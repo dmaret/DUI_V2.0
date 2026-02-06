@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Grille PIA – Contextualisation des niveaux</title>
+  <style>
+    :root{
+      --bg:#f4f4f6;
+      --card:#ffffff;
+      --accent:#1a468f;
+      --accent-2:#0f2f66;
+      --accent-soft:#e3ebfa;
+      --border:#d0d0dd;
+      --text:#222;
+      --muted:#666;
+      --warn-bg:#fff9e6;
+      --warn-border:#e2c477;
+      --shadow: 0 10px 30px rgba(0,0,0,.07);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      background:linear-gradient(180deg,#f7f7fb,var(--bg));
+      color:var(--text);
+    }
+    .page{max-width:1200px;margin:0 auto;padding:18px 14px 36px}
+    header{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px 14px 12px;
+      box-shadow:var(--shadow);
+      margin-bottom:12px;
+    }
+    h1{margin:0 0 4px 0;font-size:1.55rem;font-weight:900;letter-spacing:-.01em}
+    .subtitle{color:var(--muted);font-size:.92rem}
+
+    .controls{
+      margin-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px 16px;
+      align-items:center;
+      font-size:.92rem;
+    }
+    .controls label{display:flex;align-items:center;gap:8px}
+    input[type="text"]{
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      min-width:220px;
+      background:#fff;
+      outline:none;
+    }
+    input[type="text"]:focus{border-color:#9fb6e8;box-shadow:0 0 0 4px rgba(26,70,143,.10)}
+    select{
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:#fff;
+      min-width:360px;
+      outline:none;
+    }
+    select:focus{border-color:#9fb6e8;box-shadow:0 0 0 4px rgba(26,70,143,.10)}
+
+    .info-box{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:var(--warn-bg);
+      border:1px solid var(--warn-border);
+      line-height:1.45;
+      font-size:.92rem;
+      box-shadow:0 8px 20px rgba(0,0,0,.05);
+    }
+    .info-box h2{margin:0 0 6px 0;font-size:1rem;font-weight:900}
+    .info-box h3{margin:10px 0 6px 0;font-size:.95rem;font-weight:900}
+    .info-box p{margin:0}
+
+    .layout{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns:minmax(0, 1.35fr) minmax(0, 2fr);
+      gap:16px;
+      align-items:flex-start;
+    }
+    @media (max-width: 900px){.layout{grid-template-columns:1fr}}
+
+    .items-list{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:10px;
+      max-height:72vh;
+      overflow:auto;
+      box-shadow:var(--shadow);
+    }
+    .section-title{
+      margin:12px 6px 8px;
+      font-size:.78rem;
+      font-weight:950;
+      letter-spacing:.06em;
+      color:var(--muted);
+      text-transform:uppercase;
+    }
+    .item-btn{
+      width:100%;
+      text-align:left;
+      border:1px solid transparent;
+      background:transparent;
+      border-radius:12px;
+      padding:10px 10px;
+      cursor:pointer;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      margin-bottom:6px;
+      transition: background .12s ease, border-color .12s ease;
+    }
+    .item-btn:hover{background:#f1f3fb}
+    .item-btn.active{
+      background:linear-gradient(180deg,var(--accent-soft),#f3f6ff);
+      border-color:rgba(26,70,143,.45);
+    }
+    .code{
+      font-weight:950;
+      color:var(--accent);
+      min-width:3.2rem;
+      white-space:nowrap;
+    }
+    .label{flex:1}
+
+    .detail-card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px 14px;
+      min-height:300px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      box-shadow:var(--shadow);
+    }
+    .detail-header{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:baseline;
+    }
+    .detail-title{font-size:1.05rem;font-weight:950}
+    .detail-meta{color:var(--muted);font-size:.88rem}
+
+    .levels{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      font-size:.88rem;
+    }
+    .levels label{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#f7f7fb;
+      cursor:pointer;
+      user-select:none;
+      transition: background .12s ease, border-color .12s ease, color .12s ease;
+    }
+    .levels input{accent-color:var(--accent)}
+    .levels label.active{
+      background:var(--accent-soft);
+      border-color:var(--accent);
+      color:var(--accent-2);
+      font-weight:900;
+    }
+
+    .definition{
+      margin-top:2px;
+      padding:12px 12px;
+      border-radius:12px;
+      background:#f8f8fc;
+      border:1px solid #ececf5;
+      font-size:.95rem;
+      line-height:1.45;
+      white-space:pre-wrap;
+      min-height:120px;
+    }
+    .no-text{color:#b00020}
+
+    .examples{
+      margin-top:8px;
+      padding:10px 12px;
+      border-radius:12px;
+      background:#ffffff;
+      border:1px solid var(--border);
+      font-size:.92rem;
+    }
+    .examples-title{font-weight:950;margin-bottom:6px}
+    .examples ul{margin:0 0 0 18px;padding:0}
+    .examples li{margin:0 0 4px 0}
+
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:2px;
+    }
+    .btn{
+      border-radius:999px;
+      border:1px solid var(--accent);
+      background:var(--accent);
+      color:#fff;
+      padding:7px 12px;
+      font-size:.88rem;
+      cursor:pointer;
+      transition: transform .05s ease, filter .12s ease;
+    }
+    .btn:hover{filter:brightness(1.05)}
+    .btn.secondary{background:#fff;color:var(--accent)}
+    .btn:active{transform:translateY(1px)}
+    .hint{
+      font-size:.82rem;
+      color:var(--muted);
+      line-height:1.4;
+      padding-top:2px;
+    }
+
+    .summary-card{
+      margin-top:18px;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px 14px;
+      box-shadow:var(--shadow);
+    }
+    .summary-card h2{margin:0 0 8px 0;font-size:1.05rem;font-weight:950}
+    .summary-line{color:var(--muted);font-size:.9rem;margin-bottom:10px}
+
+    .kpis{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:10px;
+      margin-bottom:12px;
+    }
+    @media (max-width: 900px){.kpis{grid-template-columns:repeat(2, minmax(0,1fr))}}
+    .kpi{
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:linear-gradient(180deg,#fbfbff,#f7f9ff);
+      padding:10px 12px;
+    }
+    .kpi .kpi-title{color:var(--muted);font-size:.82rem;margin-bottom:6px}
+    .kpi .kpi-value{font-size:1.2rem;font-weight:950}
+
+    table{width:100%;border-collapse:collapse;font-size:.88rem}
+    th, td{border:1px solid var(--border);padding:7px 8px;text-align:left;vertical-align:top}
+    th{background:#f1f3fb;font-weight:950}
+    .nowrap{white-space:nowrap}
+
+    /* Bloc impression */
+    .print-card{
+      margin-top:18px;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px 14px;
+      box-shadow:var(--shadow);
+    }
+    .print-card h2{margin:0 0 8px 0;font-size:1.05rem;font-weight:950}
+    .print-meta{
+      color:var(--text);
+      font-size:.92rem;
+      line-height:1.4;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:linear-gradient(180deg,#fbfbff,#f7f9ff);
+      margin-bottom:12px;
+    }
+    .print-defs h3{margin:0 0 8px 0;font-size:.98rem;font-weight:950}
+    .print-item{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px 12px;
+      margin:0 0 10px 0;
+    }
+    .print-item-title{font-weight:950;margin:0 0 4px 0}
+    .print-item-sub{color:var(--muted);font-size:.88rem;margin:0 0 8px 0}
+    .print-item-text{white-space:pre-wrap;line-height:1.45;font-size:.92rem;margin:0}
+
+    @media print{
+      body{background:#fff}
+      header, .info-box, .layout{display:none !important;}
+      #print-card{display:block !important;}
+      .summary-card{border:none;box-shadow:none;padding:0;margin-top:14px}
+      .page{max-width:900px}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <header>
+      <h1>Grille PIA – Contextualisation des niveaux</h1>
+      <div class="subtitle">Saisie du nom, choix du type de handicap et du niveau 1–5 pour chaque item.</div>
+
+      <div class="controls">
+        <label>
+          Nom de la personne :
+          <input type="text" id="nom" placeholder="Marc, Jeanne, …" />
+        </label>
+        <label>
+          Type de handicap :
+          <select id="contexte">
+            <option value="HMHP">Handicap mental / handicap physique (HM/HP)</option>
+            <option value="HPSD">Handicap physique / situation de dépendance (HPS/SD)</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="info-box">
+        <h2>Journalisation – définition</h2>
+        <p>
+          La journalisation fait partie du quotidien d'un atelier. Elle est réalisée pour garder une trace des événements
+          et faire sens avec le vécu et les projets professionnels de tous les CEA au niveau de l'atelier.
+          Elle permet aussi d'objectiver l'acquisition des compétences en vue des bilans.
+          Des observations pour chaque CEA doivent être réalisées au moins une semaine complète par mois.
+        </p>
+        <h3>Mode d'emploi</h3>
+        <p>
+          Pour fonctionner correctement, il faut compléter à minima les colonnes « Notes de » et « Liste des CEA »
+          dans l'onglet journal. Les autres champs sont libres. La récapitulation fonctionne en sélectionnant le CEA
+          dans la liste, puis en cliquant sur son nom. Tu peux ensuite suivre le lien « Aller sur grille PIA »,
+          compléter les commentaires des différents items de la grille intermédiaire et enfin utiliser le bouton
+          « Enregistrer PDF ».
+        </p>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="items-list" id="items-list"></aside>
+
+      <section class="detail-card" id="detail-card">
+        <div class="detail-header">
+          <div class="detail-title" id="detail-title">Choisis un item dans la liste</div>
+          <div class="detail-meta" id="detail-meta"></div>
+        </div>
+
+        <div class="levels" id="levels"></div>
+
+        <div class="definition" id="definition">
+          Sélectionne un item à gauche, puis choisis le niveau 1 à 5 pour afficher la description.
+        </div>
+
+        <div class="examples" id="examples-block" style="display:none;">
+          <div class="examples-title">Exemples d'interventions possibles</div>
+          <ul id="examples-list"></ul>
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="btn-print">Exporter en PDF (impression)</button>
+          <button class="btn secondary" id="btn-export-json">Exporter JSON</button>
+          <button class="btn secondary" id="btn-export-csv">Exporter CSV</button>
+          <button class="btn secondary" id="btn-copy">Copier le texte de l'item</button>
+          <button class="btn secondary" id="btn-reset">Réinitialiser la fiche</button>
+        </div>
+
+        <div class="hint">
+          - « Exporter en PDF » utilise l'impression du navigateur (la liste des items et ce panneau sont masqués à l'impression).<br/>
+          - JSON/CSV exportent les choix (niveau + valeur barème) + informations de contexte.<br/>
+          - La copie reprend le nom, le contexte, l'item, le niveau et la description.
+        </div>
+      </section>
+    </div>
+
+    <section class="print-card" id="print-card" style="display:none;">
+      <h2>Grille PIA — Fiche de synthèse</h2>
+      <div class="print-meta" id="print-meta"></div>
+
+      <div class="print-defs">
+        <h3>Items sélectionnés — définitions</h3>
+        <div id="print-defs-list"></div>
+      </div>
+    </section>
+
+    <section class="summary-card">
+      <h2>Récapitulatif des niveaux choisis</h2>
+      <div class="summary-line" id="summary-line">Aucun niveau sélectionné pour l'instant.</div>
+
+      <div class="kpis" id="kpis" style="display:none;">
+        <div class="kpi">
+          <div class="kpi-title">Items évalués</div>
+          <div class="kpi-value" id="kpi-count">0</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-title">Somme des niveaux (1–5)</div>
+          <div class="kpi-value" id="kpi-sum-levels">0</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-title">Somme des valeurs (barèmes)</div>
+          <div class="kpi-value" id="kpi-sum-values">0</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-title">Valeur moyenne</div>
+          <div class="kpi-value" id="kpi-avg">0.00</div>
+        </div>
+      </div>
+
+      <div id="summary-table">Aucun niveau sélectionné pour l'instant.</div>
+    </section>
+  </div>
+
+<script>
+/** ============================================================================
+ *  1) Données de base (Items + libellés par contexte)
+ *  ==========================================================================*/
+
+const ITEMS = [
+  { code:"1.1", section:"Avant le début de l'activité",
+    labels:{
+      HMHP:"Instruire : besoin d'expliquer, de montrer, d'accompagner",
+      HPSD:"Instruire : besoin d'expliquer, de montrer, d'accompagner"
+    }
+  },
+  { code:"2.1", section:"Place en occupation de jour",
+    labels:{
+      HMHP:"Aménager : besoins de soutiens, instructions écrites, pictos, gabarits, photos",
+      HPSD:"Aménager : besoin de fiches de travail, pictos, gabarits, photos"
+    }
+  },
+  { code:"3.1", section:"Pendant l'activité",
+    labels:{
+      HMHP:"Soutenir, accompagner : pendant l'activité",
+      HPSD:"Soutenir, accompagner : pendant l'activité"
+    }
+  },
+  { code:"4.1", section:"Résultat de l'activité",
+    labels:{
+      HMHP:"Contrôler : accompagnement pour apprendre l'autocontrôle",
+      HPSD:"Contrôler : accompagnement pour apprendre l'autocontrôle"
+    }
+  },
+  { code:"5.1", section:"Limitations psychiques & comportements",
+    labels:{
+      HMHP:"Proximité & distance / auto-hétéro-agression (HM/HP)",
+      HPSD:"Addiction PsD"
+    }
+  },
+  { code:"5.2", section:"Limitations psychiques & comportements",
+    labels:{
+      HMHP:"Symptômes / comportements inadéquats",
+      HPSD:"Proximité & distance, auto-agression et hétéro-agression PsD"
+    }
+  },
+  { code:"5.3", section:"Limitations psychiques & comportements",
+    labels:{
+      HMHP:"Fugue avec mise en danger (HM/HP)",
+      HPSD:"Symptômes de maladie psychique PsD"
+    }
+  },
+  { code:"6.1", section:"Soins de base & alimentation",
+    labels:{
+      HMHP:"Soins corporels et traitements médicaux particuliers",
+      HPSD:"Attitude adéquate et mesures médicales particulières"
+    }
+  },
+  { code:"6.2", section:"Soins de base & alimentation",
+    labels:{
+      HMHP:"Ingestion de nourriture entre les repas (encas) / hydratation",
+      HPSD:"Ingestion de nourriture entre les repas (encas) / hydratation"
+    }
+  },
+  { code:"7.1", section:"Capacité de travail & échange d'information",
+    labels:{
+      HMHP:"Capacité de travail et capacité d'agir / autodétermination",
+      HPSD:"Capacité de travail et autodétermination"
+    }
+  },
+  { code:"7.2", section:"Capacité de travail & échange d'information",
+    labels:{
+      HMHP:"Échange d'informations avec le réseau",
+      HPSD:"Échange d'informations suppléant (réseau)"
+    }
+  },
+];
+
+const LEVEL_LABELS = {
+  1: "Rarement (1 à 2 fois / mois)",
+  2: "Occasionnellement (env. 1 fois / semaine)",
+  3: "Régulièrement (2 à 4 fois / semaine)",
+  4: "Souvent (env. 1 fois / jour)",
+  5: "Très souvent (plusieurs fois / jour)"
+};
+
+/** ============================================================================
+ *  2) Barèmes : par contexte ET par item (conformes au tableau collé)
+ *     - Si l'item est sur 0..4 => [0,1,2,3,4]
+ *     - Si l'item est sur 0..8 (pas de 2) => [0,2,4,6,8]
+ *  ==========================================================================*/
+const BAREMES = {
+  HMHP: {
+    "1.1": [0,1,2,3,4],
+    "2.1": [0,1,2,3,4],
+    "3.1": [0,2,4,6,8],
+    "4.1": [0,1,2,3,4],
+    "5.1": [0,2,4,6,8],
+    "5.2": [0,2,4,6,8],
+    "5.3": [0,1,2,3,4],
+    "6.1": [0,2,4,6,8],
+    "6.2": [0,1,2,3,4],
+    "7.1": [0,1,2,3,4],
+    "7.2": [0,1,2,3,4],
+  },
+  HPSD: {
+    "1.1": [0,1,2,3,4],
+    "2.1": [0,1,2,3,4],
+    "3.1": [0,2,4,6,8],
+    "4.1": [0,1,2,3,4],
+    "5.1": [0,2,4,6,8],
+    "5.2": [0,2,4,6,8],
+    "5.3": [0,1,2,3,4],
+    "6.1": [0,1,2,3,4],
+    "6.2": [0,1,2,3,4],
+    "7.1": [0,2,4,6,8],
+    "7.2": [0,2,4,6,8],
+  }
+};
+
+function getValeur(contexte, itemCode, level){
+  const arr = (BAREMES[contexte] || {})[itemCode];
+  if (!arr) return 0;
+  return arr[level - 1] ?? 0;
+}
+
+/** ============================================================================
+ *  3) Exemples
+ *  ==========================================================================*/
+const EXEMPLES = {
+  HMHP: {
+    "1.1": ["Explication de l'activité","Démonstration des gestes","Rappel des consignes"],
+    "2.1": ["Organisation du poste de travail","Aménagement ergonomique du poste","Mise en place de gabarits"],
+    "3.1": ["Soutien pendant l'activité","Rester à proximité pour permettre la réalisation","Encourager / rassurer","Aider à fixer des priorités (définir les étapes)"],
+    "4.1": ["Vérification d'une étape ou du résultat final","Analyse conjointe de la tâche effectuée","Retour sur la qualité du travail effectué"],
+    "5.1": ["Régulation de la distance relationnelle","Prévenir auto-/hétéro-agression","Sécuriser l'environnement de travail"],
+    "5.2": ["Rappel du cadre et des règles convenues","Ajustements pour limiter les débordements","Soutien spécifique lié aux difficultés"],
+    "5.3": ["Prévenir une mise en danger","Rappels des règles de sécurité","Recentrage et retour au poste"],
+    "6.1": ["Aide à la prise de traitements si nécessaire","Incitation à l'hygiène (lavage des mains, etc.)","Mesures sanitaires (p. ex. protocole)"],
+    "6.2": ["Rappels hydratation (canicule)","Rappels alimentation si besoin identifié"],
+    "7.1": ["Entretiens réguliers selon besoins","Valorisation / feedback","Actions liées à la ponctualité / régularité"],
+    "7.2": ["Échanges réseau externe (médecin, psy, famille, curateur, etc.)","Échanges réseau interne","Réunions de réseau"]
+  },
+  HPSD: {
+    "1.1": ["Explication de l'activité","Démonstration des gestes","Rappel des consignes"],
+    "2.1": ["Organisation du poste de travail","Aménagement ergonomique du poste","Mise en place de gabarits"],
+    "3.1": ["Soutien pendant l'activité","Rester à proximité pour permettre la réalisation","Encourager / rassurer","Aider à fixer des priorités (définir les étapes)"],
+    "4.1": ["Vérification d'une étape ou du résultat final","Analyse conjointe de la tâche effectuée","Retour sur la qualité du travail effectué"],
+    "5.1": ["Accompagnement lié à une addiction (alcool, cigarettes, téléphone)","Collaboration avec spécialistes","Adaptations du travail liées à l'addiction"],
+    "5.2": ["Régulation de la distance relationnelle","Prévenir tensions / conflits","Sécuriser l'environnement de travail"],
+    "5.3": ["Soutien lié aux troubles psychiques","Entretiens de recentrage","Actions d'apaisement (pause, changement de poste, etc.)"],
+    "6.1": ["Soutien hygiène (vêtements, propreté)","Rappels traitements / contrôles","Application protocole si délégation"],
+    "6.2": ["Rappels hydratation (canicule)","Rappels alimentation si besoin identifié"],
+    "7.1": ["Entretiens réguliers selon besoins","Soutien motivationnel","Aider à clarifier les souhaits d'évolution"],
+    "7.2": ["Échanges réseau externe","Échanges réseau interne","Réunions de réseau"]
+  }
+};
+
+/** ============================================================================
+ *  4) Textes (définitions) : issus du tableau collé
+ *     - Formulation neutre (évite "il/elle" quand possible)
+ *  ==========================================================================*/
+const DEFINITIONS = {
+  HMHP: {
+    "1.1": {
+      1: "Il est nécessaire de reprendre et expliquer les bases du travail lorsqu'il n'a pas été réalisé depuis longtemps.",
+      2: "Il faut un accompagnement lorsque le travail change durant la semaine. S'assurer que la personne remette en place/reprenne son poste de travail de manière autonome. Un contrôle est nécessaire.",
+      3: "La personne est en général capable de reprendre son activité d'un jour à l'autre. Il faut tout de même s'assurer que tout aille bien car des erreurs peuvent survenir.",
+      4: "La personne a besoin d'un accompagnement quotidien pour sa mise en route sur un poste de travail.",
+      5: "La personne n'a pas les capacités pour reprendre un poste de travail de manière autonome. Il faut donner une explication après toute interruption et à chaque reprise du travail."
+    },
+    "2.1": {
+      1: "Lorsque le travail n'a pas été réalisé depuis plusieurs semaines, il peut arriver que la personne ait besoin de soutien pour aménager son poste de travail.",
+      2: "La personne maîtrise en principe l'aménagement de son poste de travail, un contrôle ou une aide est tout de même nécessaire de temps en temps.",
+      3: "La personne a un besoin d'aide régulier pour aménager son poste de travail. Les modes opératoires, gabarits ou autres sont nécessaires pour aider dans la pratique. En revanche si l'activité ne change pas, la personne est autonome.",
+      4: "La personne doit être aidée chaque jour pour l'aménagement et la remise en état de son poste de travail.",
+      5: "La personne ne peut travailler qu'avec l'aide de mode opératoire, de gabarit, de modèles, etc. L'aménagement est toujours accompagné."
+    },
+    "3.1": {
+      1: "En principe, la personne n'a pas besoin de soutien pour réaliser les tâches de production. Il est tout de même nécessaire de s'assurer de cette autonomie.",
+      2: "Un point de situation hebdomadaire est nécessaire afin de s'assurer qu'une bonne compréhension du poste est maintenue. La vérification du stock, du rythme de travail et de la quantité de production est nécessaire.",
+      3: "La personne a besoin de stimulations régulières pour assurer sa capacité de production. Une attention doit être portée sur le rythme et la concentration afin d'éviter la dispersion. Vérification du stock, du rythme et des quantités nécessaire.",
+      4: "La personne a besoin d'un accompagnement quotidien pour valider l'aménagement du poste ainsi que le stock de matériel nécessaire à la production. Accompagnement systématique pour la mise en route de l'activité.",
+      5: "Plusieurs fois par jour, il est nécessaire d'être à proximité pour motiver, stimuler et vérifier la disponibilité des composants. À chaque arrêt de production, la reprise est accompagnée."
+    },
+    "4.1": {
+      1: "La personne a acquis la capacité d'évaluation de la bienfacture. Elle reprend d'elle-même et corrige les défauts occasionnels. Il arrive parfois qu'une validation sur la qualité de la production soit demandée.",
+      2: "Un contrôle aléatoire hebdomadaire est utile afin de vérifier et valider que l'autocontrôle est maintenu.",
+      3: "La personne est assez fiable sur ses capacités d'autocontrôle mais n'a pas encore acquis toute l'autonomie nécessaire. Des contrôles réguliers sont nécessaires pour finaliser et valider l'acquisition de cette compétence.",
+      4: "Les procédures d'autocontrôles doivent être reprises quotidiennement afin d'ancrer les apprentissages. La personne n'est pas totalement fiable et fait l'objet d'un accompagnement régulier.",
+      5: "La personne n'est pas fiable et n'arrive pas à effectuer d'autocontrôle. Un soutien permanent est nécessaire pour garantir la qualité de la production."
+    },
+    "5.1": {
+      1: "La personne n'a pas de comportement auto ou hétéro-agressif. Elle est capable de se défendre et d'appeler à l'aide en cas de nécessité.",
+      2: "La personne est occasionnellement confrontée à des situations de conflits. L'encadrement doit rester vigilant afin d'aider dans ces situations.",
+      3: "La personne vit plusieurs fois par semaine des situations conflictuelles. Un suivi régulier est nécessaire afin de limiter ces situations.",
+      4: "La personne se retrouve tous les jours en situation de crise ou de conflit. L'encadrement doit être attentif au quotidien à ce que cela ne déborde pas.",
+      5: "La personne demande une surveillance et un accompagnement permanent afin d'aider dans les situations de crises ou de conflits. Un accompagnement de proximité est nécessaire."
+    },
+    "5.2": {
+      1: "La personne ne souffre pas de comportements inadéquats liés au handicap.",
+      2: "Un rappel hebdomadaire du cadre et des règles convenues est nécessaire.",
+      3: "La personne a besoin d'un accompagnement régulier, plusieurs fois par semaine (ex. utilisation du téléphone, encas, etc.).",
+      4: "Tous les jours, un rappel du cadre convenu autour des difficultés est nécessaire. Un rappel quotidien est suffisant pour que cela tienne sur la journée.",
+      5: "La personne n'arrive pas à gérer les difficultés sans aide extérieure (ex. limitation nourriture, utilisation raisonnable du téléphone)."
+    },
+    "5.3": {
+      1: "La personne ne fugue pas et est consciente des risques qui l'entourent.",
+      2: "Un rappel hebdomadaire des règles de sécurité est encore nécessaire. Le risque de fugue est très faible.",
+      3: "La personne est parfois inattentive et demande un rappel régulier des règles de sécurité. La personne peut peiner à reprendre le travail et flâner au lieu de revenir au poste.",
+      4: "Il n'est pas possible d'avoir entière confiance face au danger. Les règles de sécurité doivent être reprises pour chaque activité. La personne peut flâner au lieu de revenir au poste.",
+      5: "La personne a peu conscience du danger. Un accompagnement est nécessaire pour chaque situation à risque. Un suivi de près est nécessaire afin d'éviter une mise en danger."
+    },
+    "6.1": {
+      1: "La personne est responsable et autonome dans la prise de ses traitements ou autocontrôle (diabète). Pas de risque d'épilepsie.",
+      2: "La personne est presque autonome dans la prise de ses traitements ou autocontrôle (diabète). Un rappel occasionnel peut être nécessaire. Pas de risque d'épilepsie.",
+      3: "La personne n'est pas complètement autonome dans la prise de médicaments. Il faut rappeler régulièrement d'effectuer les contrôles. Un suivi est nécessaire.",
+      4: "La personne est capable de prendre un médicament ou d'effectuer un test mais n'est pas autonome et a besoin d'un rappel pour ne pas oublier. Un accompagnement aux WC peut être nécessaire.",
+      5: "La personne n'est pas autonome dans la prise de médicaments ou autocontrôles. Une assistance est nécessaire pour tous les actes liés aux traitements médicaux."
+    },
+    "6.2": {
+      1: "La personne est autonome dans le choix de son alimentation.",
+      2: "La personne est autonome dans le choix de son alimentation. Un rappel hebdomadaire des bonnes pratiques alimentaires est nécessaire.",
+      3: "La personne a besoin d'être accompagnée pour gérer ses habitudes alimentaires avec bon sens (rappels encas, boissons durant fortes chaleurs).",
+      4: "Des rappels quotidiens sont nécessaires. La personne n'est pas autonome dans les choix de nourriture et la prise d'encas en dehors des repas.",
+      5: "La personne n'est pas autonome lors des pauses et a besoin d'un accompagnement pour maintenir des pratiques adaptées."
+    },
+    "7.1": {
+      1: "La personne aime avoir un retour sur son activité mais n'a pas besoin d'encouragement pour assurer sa production. Les entretiens informels permettent d'observer l'évolution et le sens des initiatives.",
+      2: "La personne a besoin d'un retour hebdomadaire sur la qualité du travail mais a peu besoin d'être stimulée.",
+      3: "Faute de matériel, la personne peut se retrouver sans travail. L'encadrement suit la production et l'approvisionnement. Encouragements et valorisation régulière. Esprit d'initiative présent mais a besoin de stimulus. Rarement, un entretien motivationnel peut être nécessaire.",
+      4: "Des situations de blocage peuvent survenir. L'encadrement identifie le problème pour débloquer. Encourager et valoriser aide à anticiper. Autonomie après démonstration et contrôle final. Esprit d'initiative présent mais doit être stimulé.",
+      5: "La personne est souvent arrêtée dans la tâche et n'annonce pas les manques. L'encadrement peut devoir débloquer des situations. La motivation ne suffit pas toujours. Accompagnement lors de la réalisation et contrôle final constant."
+    },
+    "7.2": {
+      1: "La personne a une bonne communication avec son entourage et effectue elle-même les transmissions. Les communications importantes au réseau se font par l'intermédiaire de l'encadrement.",
+      2: "Les échanges avec le réseau sont principalement réalisés par l'encadrement. Un point de situation hebdomadaire peut être nécessaire.",
+      3: "Plusieurs échanges avec le réseau sont nécessaires chaque semaine. Le lien privé et professionnel est important pour accompagner au quotidien.",
+      4: "Il est nécessaire de communiquer tous les jours avec le réseau pour accompagner la personne et permettre l'accomplissement dans la vie privée et professionnelle.",
+      5: "Des échanges ont lieu plusieurs fois par jour avec le réseau. La personne est très dépendante de l'entourage privé, médical et professionnel."
+    }
+  },
+
+  HPSD: {
+    "1.1": {
+      1: "Il est nécessaire de reprendre et expliquer les bases du travail lorsqu'il n'a pas été réalisé depuis longtemps.",
+      2: "Il faut un accompagnement lorsque le travail change durant la semaine. S'assurer que la personne remette en place/reprenne son poste de travail de manière autonome. Un contrôle est nécessaire.",
+      3: "La personne est en général capable de reprendre son activité d'un jour à l'autre. Il faut tout de même s'assurer que tout aille bien car des erreurs peuvent survenir.",
+      4: "La personne a besoin d'un accompagnement quotidien pour sa mise en route sur un poste de travail.",
+      5: "La personne n'a pas les capacités pour reprendre un poste de travail de manière autonome. Il faut donner une explication après toute interruption et à chaque reprise du travail."
+    },
+    "2.1": {
+      1: "Lorsque le travail n'a pas été réalisé depuis plusieurs semaines, il peut arriver que la personne ait besoin de soutien pour aménager son poste de travail.",
+      2: "La personne maîtrise en principe l'aménagement de son poste de travail, un contrôle ou une aide est tout de même nécessaire de temps en temps.",
+      3: "La personne a un besoin d'aide régulier pour aménager son poste de travail. Les modes opératoires, gabarits ou autres sont nécessaires pour aider dans la pratique. En revanche si l'activité ne change pas, la personne est autonome.",
+      4: "La personne doit être aidée chaque jour pour l'aménagement et la remise en état de son poste de travail.",
+      5: "La personne ne peut travailler qu'avec l'aide de mode opératoire, de gabarit, de modèles, etc. L'aménagement est toujours accompagné."
+    },
+    "3.1": {
+      1: "En principe, la personne n'a pas besoin de soutien pour réaliser les tâches de production. Il est tout de même nécessaire de s'assurer de cette autonomie.",
+      2: "Un point de situation hebdomadaire est nécessaire afin de s'assurer qu'une bonne compréhension du poste est maintenue. La vérification du stock, du rythme de travail et de la quantité de production est nécessaire.",
+      3: "La personne a besoin de stimulations régulières pour assurer sa capacité de production. Une attention doit être portée sur le rythme et la concentration afin d'éviter la dispersion. Vérification du stock, du rythme et des quantités nécessaire.",
+      4: "La personne a besoin d'un accompagnement quotidien pour valider l'aménagement du poste ainsi que le stock de matériel nécessaire à la production. Accompagnement systématique pour la mise en route de l'activité.",
+      5: "Plusieurs fois par jour, il est nécessaire d'être à proximité pour motiver, stimuler et vérifier la disponibilité des composants. À chaque arrêt de production, la reprise est accompagnée."
+    },
+    "4.1": {
+      1: "La personne a acquis la capacité d'évaluation de la bienfacture. Elle reprend d'elle-même et corrige les défauts occasionnels. Il arrive parfois qu'une validation sur la qualité de la production soit demandée.",
+      2: "Un contrôle aléatoire hebdomadaire est utile afin de vérifier et valider que l'autocontrôle est maintenu.",
+      3: "La personne est assez fiable sur ses capacités d'autocontrôle mais n'a pas encore acquis toute l'autonomie nécessaire. Des contrôles réguliers sont nécessaires pour finaliser et valider l'acquisition de cette compétence.",
+      4: "Les procédures d'autocontrôles doivent être reprises quotidiennement afin d'ancrer les apprentissages. La personne n'est pas totalement fiable et fait l'objet d'un accompagnement régulier.",
+      5: "La personne n'est pas fiable et n'arrive pas à effectuer d'autocontrôle. Un soutien permanent est nécessaire pour garantir la qualité de la production."
+    },
+    "5.1": {
+      1: "La personne n'a pas besoin de soutien en lien avec ses addictions, si elle en a. Qu'elle soit abstinente ou non, l'addiction n'a pas d'impact durant le temps de travail. Un entretien de situation (informel) peut s'avérer utile une à deux fois par mois.",
+      2: "Une intervention en lien avec une addiction (cigarette, alcool, utilisation du smartphone) est nécessaire 1 fois par semaine. La disponibilité varie selon les habitudes de consommation. Un entretien de situation (informel) peut être utile, mais pas plus d'une fois par semaine. Il n'est pas nécessaire d'adapter l'activité.",
+      3: "Une adaptation de l'activité ou une intervention en lien avec une addiction est nécessaire au moins 2 fois par semaine. La disponibilité varie selon les habitudes de consommation. Un entretien de situation (informel) peut être utile, mais pas plus d'une fois par semaine.",
+      4: "Une adaptation de l'activité ou une intervention en lien avec une addiction est nécessaire quotidiennement. La disponibilité dépend des consommations. Un entretien spécifique est nécessaire, plusieurs fois par semaine.",
+      5: "Des adaptations et interventions en lien avec une addiction sont nécessaires quotidiennement. Les habitudes de consommation empêchent de travailler de manière indépendante. Un encadrement de proximité est nécessaire pour permettre de rester en activité."
+    },
+    "5.2": {
+      1: "La personne n'a pas de comportement auto ou hétéro-agressif. Elle comprend et respecte une distance interpersonnelle adéquate. Elle est capable de se défendre et d'appeler à l'aide en cas de nécessité.",
+      2: "La personne est occasionnellement confrontée à des situations de conflits. La distance interpersonnelle peut être parfois inadéquate et source de tension ou d'incompréhension. L'encadrement doit rester vigilant afin d'aider dans ces situations.",
+      3: "La personne vit plusieurs fois par semaine des situations conflictuelles. La distance interpersonnelle est régulièrement inadéquate dans un contexte donné et source de tension ou d'incompréhension. Un suivi régulier est nécessaire afin de limiter ces situations.",
+      4: "La personne se retrouve tous les jours en situation de crise ou de conflit. La distance interpersonnelle est source de tension ou d'incompréhension quotidienne. L'encadrement doit être attentif au quotidien à ce que cela ne déborde pas.",
+      5: "La personne demande une surveillance et un accompagnement permanent afin d'aider dans les situations de crises ou de conflits. Un accompagnement de proximité est nécessaire."
+    },
+    "5.3": {
+      1: "La personne ne souffre pas de comportements inadéquats liés à sa maladie. Les traitements sont adéquats et permettent de fonctionner dans le cadre proposé.",
+      2: "Un rappel hebdomadaire du cadre et des règles convenues est nécessaire. Une intervention spécifique aux troubles psychiques peut être demandée au maximum une fois par semaine. La médication ne pallie pas l'expression de tous les troubles et demande une intervention hebdomadaire.",
+      3: "Un rappel hebdomadaire du cadre et des règles convenues est nécessaire. Un accompagnement régulier, plusieurs fois par semaine, est nécessaire spécifiquement lié aux troubles psychiques. La médication ne pallie pas l'expression de tous les troubles et demande une intervention régulière.",
+      4: "Un rappel plusieurs fois par semaine du cadre et des règles convenues est nécessaire. Un accompagnement quotidien est nécessaire spécifiquement lié aux troubles psychiques. La médication ne pallie pas l'expression de tous les troubles et demande une intervention quotidienne.",
+      5: "Un rappel quotidien du cadre et des règles convenues est nécessaire. Un accompagnement quotidien est nécessaire spécifiquement lié aux troubles psychiques. La médication ne pallie pas l'expression de tous les troubles et demande une intervention plusieurs fois par jour."
+    },
+    "6.1": {
+      1: "La personne est responsable et autonome dans la prise de ses traitements ou autocontrôle (diabète). La personne est autonome en matière d'hygiène. Pas de risque d'épilepsie. Une réserve peut être suggérée par l'encadrement, cela reste rare.",
+      2: "La personne a besoin d'un soutien hebdomadaire en matière d'hygiène (vêtements, propreté, odeurs). Les traitements restent gérés de manière autonome. Une réserve peut être suggérée au maximum 4 fois par mois.",
+      3: "La personne a besoin d'un soutien plusieurs fois par semaine en matière d'hygiène. La prise de médicaments peut nécessiter des rappels. Une réserve peut être suggérée parfois plusieurs fois par semaine. Un suivi est nécessaire.",
+      4: "La personne est capable de prendre un médicament ou d'effectuer un test mais n'est pas autonome et a besoin d'un rappel. Une réserve peut être suggérée parfois plusieurs fois par semaine. Un suivi est nécessaire.",
+      5: "La personne n'est pas autonome dans la prise de médicaments ou autocontrôles. Une assistance est nécessaire selon protocole et délégation. Un suivi est nécessaire."
+    },
+    "6.2": {
+      1: "La personne est autonome dans le choix de son alimentation. Un rappel mensuel des bonnes pratiques alimentaires peut avoir un sens.",
+      2: "La personne est autonome mais peut être tentée de faire des écarts. Un rappel hebdomadaire des bonnes pratiques alimentaires est nécessaire.",
+      3: "La personne a besoin d'être accompagnée pour gérer ses habitudes alimentaires avec bon sens (rappels encas, boissons durant fortes chaleurs).",
+      4: "Des rappels quotidiens sont nécessaires. La personne n'est pas autonome dans les choix de nourriture et la prise d'encas en dehors des repas.",
+      5: "La personne n'est pas autonome lors des pauses et a besoin d'un accompagnement pour maintenir des pratiques adaptées."
+    },
+    "7.1": {
+      1: "La personne aime avoir un retour sur son activité mais n'a pas besoin d'encouragement pour assurer sa production. Un échange mensuel est utile pour situer l'intérêt pour les activités, les apprentissages et l'orientation professionnelle.",
+      2: "La personne a besoin d'un retour hebdomadaire sur la qualité du travail mais a peu besoin d'être motivée. La personne se positionne davantage lorsqu'elle est stimulée sur les apprentissages et l'orientation professionnelle.",
+      3: "Faute de matériel, la personne peut se retrouver sans travail. L'encadrement suit la production et l'approvisionnement. Encouragements et valorisation régulière. Esprit d'initiative présent mais a besoin de stimulus. La personne a besoin d'être stimulée pour exprimer ses souhaits d'apprentissages ou l'orientation professionnelle.",
+      4: "Des situations de blocage peuvent survenir. L'encadrement identifie le problème pour débloquer. Encourager et valoriser aide à anticiper. La personne est autonome après démonstration et contrôle final. Les souhaits ne s'expriment pas sans accompagnement avec exemples concrets ou démonstrations.",
+      5: "La personne est souvent arrêtée dans la tâche et n'annonce pas les manques. L'encadrement peut devoir débloquer des situations. Accompagnement lors de la réalisation et contrôle final constant. La personne n'arrive pas à se positionner sur les choix d'activités ou l'évolution; essais et exercices guidés favorisent des choix."
+    },
+    "7.2": {
+      1: "La personne a une bonne communication avec son entourage et effectue elle-même les transmissions. Les communications importantes au réseau se font par l'intermédiaire de l'encadrement.",
+      2: "Les échanges avec le réseau sont principalement réalisés par l'encadrement. Un point de situation hebdomadaire avec le réseau peut être nécessaire.",
+      3: "Plusieurs échanges avec le réseau sont nécessaires chaque semaine. Le lien privé et professionnel est important pour accompagner au quotidien.",
+      4: "Il est nécessaire de communiquer tous les jours avec le réseau pour accompagner la personne et permettre l'accomplissement dans la vie privée et professionnelle.",
+      5: "Des échanges ont lieu plusieurs fois par jour avec le réseau. La personne est très dépendante de l'entourage privé, médical et professionnel."
+    }
+  }
+};
+
+/** ============================================================================
+ *  5) Utilitaires
+ *  ==========================================================================*/
+function contexteLabel(ctx){
+  return (ctx === "HMHP")
+    ? "Handicap mental / handicap physique (HM/HP)"
+    : "Handicap physique / situation de dépendance (HPS/SD)";
+}
+
+function itemLabel(ctx, code){
+  const it = ITEMS.find(x => x.code === code);
+  if (!it) return code;
+  return (it.labels && it.labels[ctx]) ? it.labels[ctx] : code;
+}
+
+function getCurrentText(ctx, code, level){
+  const blocItem = (DEFINITIONS[ctx] || {})[code] || {};
+  return blocItem[level] || "";
+}
+
+function interpolateNom(text, nom){
+  const n = (nom || "").trim();
+  if (!n) return text;
+  return text.replace(/\bla personne\b/gi, n);
+}
+
+function downloadFile(filename, content, mime){
+  const blob = new Blob([content], {type: mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/** ============================================================================
+ *  6) Etat + DOM
+ *  ==========================================================================*/
+const selections = { HMHP: {}, HPSD: {} };
+const UNDO = {}; // mémoire pour "Annuler" après suppression d'un item
+let selectedItemCode = ITEMS[0].code;
+let selectedLevel = 1;
+
+
+
+const itemsListEl = document.getElementById("items-list");
+const levelsEl = document.getElementById("levels");
+const defEl = document.getElementById("definition");
+const titleEl = document.getElementById("detail-title");
+const metaEl = document.getElementById("detail-meta");
+const nomEl = document.getElementById("nom");
+const contexteEl = document.getElementById("contexte");
+const btnPrint = document.getElementById("btn-print");
+const btnCopy = document.getElementById("btn-copy");
+const btnReset = document.getElementById("btn-reset");
+const btnExportJson = document.getElementById("btn-export-json");
+const btnExportCsv = document.getElementById("btn-export-csv");
+const examplesBlock = document.getElementById("examples-block");
+const examplesList = document.getElementById("examples-list");
+const summaryLineEl = document.getElementById("summary-line");
+const summaryTableEl = document.getElementById("summary-table");
+const kpisEl = document.getElementById("kpis");
+const kpiCountEl = document.getElementById("kpi-count");
+const kpiSumLevelsEl = document.getElementById("kpi-sum-levels");
+const kpiSumValuesEl = document.getElementById("kpi-sum-values");
+const kpiAvgEl = document.getElementById("kpi-avg");
+const printCardEl = document.getElementById("print-card");
+const printMetaEl = document.getElementById("print-meta");
+const printDefsListEl = document.getElementById("print-defs-list");
+
+/** ============================================================================
+ *  7) UI : liste items / niveaux / détails
+ *  ==========================================================================*/
+function buildItemsList() {
+  itemsListEl.innerHTML = "";
+  let currentSection = null;
+  const ctx = contexteEl.value;
+
+  ITEMS.forEach(item => {
+    if (item.section !== currentSection) {
+      currentSection = item.section;
+      const sectionEl = document.createElement("div");
+      sectionEl.className = "section-title";
+      sectionEl.textContent = currentSection;
+      itemsListEl.appendChild(sectionEl);
+    }
+
+    const btn = document.createElement("button");
+    btn.className = "item-btn";
+    btn.dataset.code = item.code;
+
+    const spanCode = document.createElement("span");
+    spanCode.className = "code";
+    spanCode.textContent = item.code;
+
+    const spanLabel = document.createElement("span");
+    spanLabel.className = "label";
+    spanLabel.textContent = itemLabel(ctx, item.code);
+
+    btn.appendChild(spanCode);
+    btn.appendChild(spanLabel);
+
+    btn.addEventListener("click", () => {
+      selectedItemCode = item.code;
+      refreshActiveItem();
+      refreshDetail();
+    });
+
+    itemsListEl.appendChild(btn);
+  });
+
+  refreshActiveItem();
+}
+
+function refreshActiveItem() {
+  itemsListEl.querySelectorAll(".item-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.code === selectedItemCode);
+  });
+}
+
+function buildLevels() {
+  levelsEl.innerHTML = "";
+  const ctx = contexteEl.value;
+
+  for (let i = 1; i <= 5; i++) {
+    const id = "niveau-" + i;
+    const label = document.createElement("label");
+    label.htmlFor = id;
+
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = "niveau";
+    input.id = id;
+    input.value = String(i);
+    if (i === selectedLevel) input.checked = true;
+
+    input.addEventListener("change", () => {
+      selectedLevel = i;
+      selections[ctx][selectedItemCode] = selectedLevel;
+      refreshLevels();
+      refreshDetail();
+      updateSummary();
+    });
+
+    const span = document.createElement("span");
+    const v = getValeur(ctx, selectedItemCode, i);
+    span.textContent = `${i} — ${LEVEL_LABELS[i]} | valeur : ${v}`;
+
+    label.appendChild(input);
+    label.appendChild(span);
+    levelsEl.appendChild(label);
+  }
+  refreshLevels();
+}
+
+function refreshLevels() {
+  levelsEl.querySelectorAll("label").forEach((lab, index) => {
+    const lvl = index + 1;
+    lab.classList.toggle("active", lvl === selectedLevel);
+  });
+}
+
+function refreshExamples() {
+  const ctx = contexteEl.value;
+  const exemples = ((EXEMPLES[ctx] || {})[selectedItemCode]) || [];
+  if (!exemples.length) {
+    examplesBlock.style.display = "none";
+    examplesList.innerHTML = "";
+    return;
+  }
+  examplesBlock.style.display = "block";
+  examplesList.innerHTML = "";
+  exemples.forEach(t => {
+    const li = document.createElement("li");
+    li.textContent = t;
+    examplesList.appendChild(li);
+  });
+}
+
+function refreshDetail() {
+  const ctx = contexteEl.value;
+
+  // restaurer niveau déjà choisi si existant
+  const savedLevel = selections[ctx][selectedItemCode];
+  if (savedLevel) selectedLevel = savedLevel;
+
+  buildLevels();
+
+  const lbl = itemLabel(ctx, selectedItemCode);
+  const v = getValeur(ctx, selectedItemCode, selectedLevel);
+
+  titleEl.textContent = `${selectedItemCode} — ${lbl}`;
+  metaEl.textContent = `Contexte : ${contexteLabel(ctx)} — Niveau ${selectedLevel} (valeur ${v})`;
+
+  const rawText = getCurrentText(ctx, selectedItemCode, selectedLevel);
+  if (!rawText) {
+    defEl.textContent = "Aucun texte enregistré pour cette combinaison.";
+    defEl.classList.add("no-text");
+  } else {
+    defEl.textContent = interpolateNom(rawText, nomEl.value);
+    defEl.classList.remove("no-text");
+  }
+
+  refreshExamples();
+}
+
+/** ============================================================================
+ *  8) Récap + KPI + Table
+ *  ==========================================================================*/
+function updateSummary() {
+  const contexte = contexteEl.value;
+  const contextSelections = selections[contexte] || {};
+  const entries = Object.entries(contextSelections);
+
+  if (!entries.length) {
+    if (summaryLineEl) summaryLineEl.textContent = "Aucun niveau sélectionné pour l'instant.";
+    if (summaryTableEl) summaryTableEl.textContent = "Aucun niveau sélectionné pour l'instant.";
+    if (kpisEl) kpisEl.style.display = "none";
+    return;
+  }
+
+  const ordered = [];
+  ITEMS.forEach(item => {
+    const lvl = contextSelections[item.code];
+    if (lvl) ordered.push({ 
+      code: item.code, 
+      label: itemLabel(contexte, item.code), 
+      level: lvl 
+    });
+  });
+
+  const count = ordered.length;
+  const sumLevels = ordered.reduce((acc, r) => acc + r.level, 0);
+  const sumValues = ordered.reduce((acc, r) => acc + getValeur(contexte, r.code, r.level), 0);
+  const avg = count ? (sumValues / count) : 0;
+
+  const counts = [0, 0, 0, 0, 0];
+  ordered.forEach(r => counts[r.level - 1]++);
+
+  const lineParts = counts
+    .map((c, idx) => {
+      if (!c) return null;
+      const n = idx + 1;
+      return `${c} item(s) au niveau ${n} (${LEVEL_LABELS[n]})`;
+    })
+    .filter(Boolean);
+
+  if (summaryLineEl) {
+    summaryLineEl.textContent =
+      `Contexte : ${contexte === "HMHP" ? "HM/HP" : "HPs/SD"} — ${lineParts.join(" · ")}`;
+  }
+
+  if (kpisEl) kpisEl.style.display = "grid";
+  if (kpiCountEl) kpiCountEl.textContent = `${count} / ${ITEMS.length}`;
+  if (kpiSumLevelsEl) kpiSumLevelsEl.textContent = String(sumLevels);
+  if (kpiSumValuesEl) kpiSumValuesEl.textContent = String(sumValues);
+  if (kpiAvgEl) kpiAvgEl.textContent = avg.toFixed(2);
+
+  let html = "<table><thead><tr>";
+  html += "<th>Item</th><th>Intitulé</th><th>Niveau</th><th>Valeur</th><th>Fréquence</th><th>Action</th>";
+  html += "</tr></thead><tbody>";
+
+  ordered.forEach(row => {
+    const val = getValeur(contexte, row.code, row.level);
+    const key = `${contexte}|${row.code}`;
+    const canUndo = UNDO[key] != null;
+
+    html += "<tr>";
+    html += `<td>${escapeHtml(row.code)}</td>`;
+    html += `<td>${escapeHtml(row.label)}</td>`;
+    html += `<td>${row.level}</td>`;
+    html += `<td>${val}</td>`;
+    html += `<td>${LEVEL_LABELS[row.level]}</td>`;
+    html += `<td>
+              <button type="button" class="btn secondary btn-del" data-code="${escapeHtml(row.code)}">Supprimer</button>
+              <button type="button" class="btn secondary btn-undo" data-code="${escapeHtml(row.code)}" style="${canUndo ? "display:inline-block;" : "display:none;"}">Annuler</button>
+            </td>`;
+    html += "</tr>";
+  });
+
+  html += "</tbody></table>";
+  summaryTableEl.innerHTML = html;
+
+  if (!summaryTableEl.__boundDelete) {
+    summaryTableEl.__boundDelete = true;
+
+    summaryTableEl.addEventListener("click", (e) => {
+      const delBtn = e.target.closest(".btn-del");
+      const undoBtn = e.target.closest(".btn-undo");
+
+      if (delBtn) {
+        const code = delBtn.dataset.code;
+        const key = `${contexteEl.value}|${code}`;
+        UNDO[key] = selections[contexteEl.value][code];
+        delete selections[contexteEl.value][code];
+        refreshDetail();
+        updateSummary();
+      }
+
+      if (undoBtn) {
+        const code = undoBtn.dataset.code;
+        const key = `${contexteEl.value}|${code}`;
+        selections[contexteEl.value][code] = UNDO[key];
+        delete UNDO[key];
+        refreshDetail();
+        updateSummary();
+      }
+    });
+  }
+}
+
+
+/** ============================================================================
+ *  9) Bloc impression (nom + contexte + définitions sélectionnées)
+ *  ==========================================================================*/
+function buildPrintBlock(){
+  const ctx = contexteEl.value;
+  const nom = (nomEl.value || "").trim();
+  const picks = selections[ctx] || {};
+
+  const nomAff = nom ? nom : "—";
+  const meta = [
+    `<strong>Nom :</strong> ${escapeHtml(nomAff)}`,
+    `<strong>Type de handicap :</strong> ${escapeHtml(contexteLabel(ctx))}`,
+    `<strong>Date :</strong> ${escapeHtml(new Date().toLocaleString("fr-CH"))}`
+  ].join("<br/>");
+  printMetaEl.innerHTML = meta;
+
+  const ordered = [];
+  ITEMS.forEach(item => {
+    const lvl = picks[item.code];
+    if (!lvl) return;
+    ordered.push({
+      code: item.code,
+      label: itemLabel(ctx, item.code),
+      level: lvl,
+      valeur: getValeur(ctx, item.code, lvl),
+      texte: interpolateNom(getCurrentText(ctx, item.code, lvl), nom)
+    });
+  });
+
+  if (!ordered.length){
+    printDefsListEl.innerHTML = `<div class="print-item"><p class="print-item-text">Aucun item sélectionné.</p></div>`;
+    return;
+  }
+
+  let out = "";
+  ordered.forEach(r => {
+    out += `<div class="print-item">`;
+    out += `<p class="print-item-title">${escapeHtml(r.code)} — ${escapeHtml(r.label)}</p>`;
+    out += `<p class="print-item-sub">Niveau ${escapeHtml(String(r.level))} — ${escapeHtml(LEVEL_LABELS[r.level])} — valeur ${escapeHtml(String(r.valeur))}</p>`;
+    out += `<p class="print-item-text">${escapeHtml(r.texte || "—")}</p>`;
+    out += `</div>`;
+  });
+  printDefsListEl.innerHTML = out;
+}
+
+function escapeHtml(s){
+  return String(s)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+/** ============================================================================
+ *  10) Actions (PDF, JSON, CSV, Copy, Reset)
+ *  ==========================================================================*/
+btnPrint.addEventListener("click", () => {
+  buildPrintBlock();
+  window.print();
+});
+window.addEventListener("beforeprint", buildPrintBlock);
+
+btnCopy.addEventListener("click", async () => {
+  const ctx = contexteEl.value;
+  const nom = (nomEl.value || "").trim() || "La personne";
+  const lblCtx = contexteLabel(ctx);
+  const lblItem = itemLabel(ctx, selectedItemCode);
+  const texte = interpolateNom(getCurrentText(ctx, selectedItemCode, selectedLevel), nomEl.value);
+  const val = getValeur(ctx, selectedItemCode, selectedLevel);
+
+  const bloc = [
+    `Nom : ${nom}`,
+    `Contexte : ${lblCtx}`,
+    `Item : ${selectedItemCode} — ${lblItem}`,
+    `Niveau : ${selectedLevel}`,
+    `Valeur : ${val}`,
+    "",
+    texte || "—"
+  ].join("\n");
+
+  try{
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(bloc);
+      alert("Texte copié dans le presse-papiers.");
+    } else {
+      alert("Copie automatique indisponible. Sélectionne et copie manuellement.");
+    }
+  } catch(e){
+    alert("Impossible de copier automatiquement. Sélectionne et copie manuellement.");
+  }
+});
+
+btnReset.addEventListener("click", () => {
+  if (!confirm("Réinitialiser le nom et tous les niveaux pour commencer une nouvelle fiche ?")) return;
+  nomEl.value = "";
+  selections.HMHP = {};
+  selections.HPSD = {};
+  selectedItemCode = ITEMS[0].code;
+  selectedLevel = 1;
+  buildItemsList();
+  refreshDetail();
+  updateSummary();
+  buildPrintBlock();
+});
+
+btnExportJson.addEventListener("click", () => {
+  const ctx = contexteEl.value;
+  const nom = (nomEl.value || "").trim() || "";
+  const picks = selections[ctx] || {};
+  const rows = [];
+
+  ITEMS.forEach(item => {
+    const lvl = picks[item.code];
+    if (!lvl) return;
+    rows.push({
+      item: item.code,
+      intitule: itemLabel(ctx, item.code),
+      niveau: lvl,
+      valeur: getValeur(ctx, item.code, lvl),
+      frequence: LEVEL_LABELS[lvl],
+      definition: interpolateNom(getCurrentText(ctx, item.code, lvl), nomEl.value)
+    });
+  });
+
+  const payload = {
+    nom,
+    contexte: ctx,
+    contexte_label: contexteLabel(ctx),
+    date_export: new Date().toISOString(),
+    resultats: rows
+  };
+
+  downloadFile(
+    `PIA_${ctx}_${nom || "fiche"}.json`,
+    JSON.stringify(payload, null, 2),
+    "application/json;charset=utf-8"
+  );
+});
+
+btnExportCsv.addEventListener("click", () => {
+  const ctx = contexteEl.value;
+  const nom = (nomEl.value || "").trim() || "";
+  const picks = selections[ctx] || {};
+  const header = ["Nom","Contexte","Item","Intitulé","Niveau","Valeur","Fréquence","Définition"];
+  const lines = [header.join(";")];
+
+  ITEMS.forEach(item => {
+    const lvl = picks[item.code];
+    if (!lvl) return;
+
+    const val = getValeur(ctx, item.code, lvl);
+    const row = [
+      safeCsv(nom),
+      safeCsv(ctx === "HMHP" ? "HM/HP" : "HPS/SD"),
+      safeCsv(item.code),
+      safeCsv(itemLabel(ctx,item.code)),
+      safeCsv(String(lvl)),
+      safeCsv(String(val)),
+      safeCsv(LEVEL_LABELS[lvl]),
+      safeCsv(interpolateNom(getCurrentText(ctx, item.code, lvl), nomEl.value))
+    ];
+    lines.push(row.join(";"));
+  });
+
+  downloadFile(
+    `PIA_${ctx}_${nom || "fiche"}.csv`,
+    lines.join("\n"),
+    "text/csv;charset=utf-8"
+  );
+});
+
+function safeCsv(s){
+  return String(s ?? "")
+    .replaceAll("\n"," ")
+    .replaceAll("\r"," ")
+    .replaceAll(";"," , ");
+}
+
+/** ============================================================================
+ *  11) Evénements + init
+ *  ==========================================================================*/
+nomEl.addEventListener("input", () => { refreshDetail(); buildPrintBlock(); });
+contexteEl.addEventListener("change", () => {
+  // Rebuild list labels for new context
+  buildItemsList();
+  refreshDetail();
+  updateSummary();
+  buildPrintBlock();
+});
+
+// init
+buildItemsList();
+refreshDetail();
+updateSummary();
+buildPrintBlock();
+</script>
+</body>
+</html>
